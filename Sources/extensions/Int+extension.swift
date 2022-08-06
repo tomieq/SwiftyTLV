@@ -9,7 +9,11 @@ import Foundation
 
 extension Int {
     public var hexString: String {
-        String(format: "%04X", self)
+        var hexString = String(format: "%04X", self)
+        if ((hexString.count % 2) == 1){
+            hexString = "0" + hexString
+        }
+        return hexString
     }
 
     public var data: Data {

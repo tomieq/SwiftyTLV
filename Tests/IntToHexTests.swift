@@ -28,5 +28,6 @@ class IntToHexTests: XCTestCase {
         XCTAssertEqual(800.hexString, "0320")
         XCTAssertEqual(3190.hexString, "0C76")
         XCTAssertEqual(8192.hexString, "2000")
+        XCTAssertEqual(16777216.hexString, "01000000")
     }
 }
