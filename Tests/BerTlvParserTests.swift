@@ -72,8 +72,10 @@ class BerTlvParserTests: XCTestCase {
         XCTAssertEqual(try getSize("82FFFF"), 0xFFFF)
         XCTAssertEqual(try getSize("83010000"), 0x010000)
         XCTAssertEqual(try getSize("83FFFFFF"), 0xFFFFFF)
+        #if __LP64__
         XCTAssertEqual(try getSize("8401000000"), 0x01000000)
         XCTAssertEqual(try getSize("84FFFFFFFF"), 0xFFFFFFFF)
+        #endif
     }
 
     func test_makingPayloadSize() throws {
@@ -89,8 +91,10 @@ class BerTlvParserTests: XCTestCase {
         XCTAssertEqual(try makeData(0xFFFF), "82FFFF")
         XCTAssertEqual(try makeData(0x010000), "83010000")
         XCTAssertEqual(try makeData(0xFFFFFF), "83FFFFFF")
+        #if __LP64__
         XCTAssertEqual(try makeData(0xFFFFFFFF), "84FFFFFFFF")
         XCTAssertEqual(try makeData(0x01000000), "8401000000")
+        #endif
     }
 
     func test_serializeOneByteTLV() {
