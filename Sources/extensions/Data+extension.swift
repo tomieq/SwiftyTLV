@@ -7,6 +7,10 @@
 
 import Foundation
 
+public enum DataError: Error {
+    case outOfIndex
+}
+
 extension Data {
     public init(hexString: String) {
         let scalars = hexString.unicodeScalars
@@ -54,3 +58,29 @@ extension Data {
     }
 }
 
+extension Data {
+    public func subArray(offset: Int, length: Int) throws -> Data {
+        var result: Data = Data()
+        let rightBoudary = offset + length - 1
+        for index in offset...rightBoudary {
+            guard let _ = self[safeIndex: index] else {
+                print("Cannot get subArray(\(offset), \(length)) as right boundary \(rightBoudary) exceedes data size \(self.count)")
+                throw DataError.outOfIndex
+            }
+            result.append(self[index])
+        }
+        return result
+    }
+
+    public subscript(safeIndex index: Int) -> Element? {
+        get {
+            guard index >= 0, index < self.count else { return nil }
+            return self[index]
+        }
+
+        set(newValue) {
+            guard let value = newValue, index >= 0, index < self.count else { return }
+            self[index] = value
+        }
+    }
+}
