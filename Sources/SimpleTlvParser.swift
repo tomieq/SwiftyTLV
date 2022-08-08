@@ -37,7 +37,7 @@ public enum SimpleTlvParser {
         return result
     }
 
-    static func getLengthOffset(tlvData: Data, offset: Int) throws -> Int {
+    public static func getLengthOffset(tlvData: Data, offset: Int) throws -> Int {
         guard let data = tlvData[safeIndex: offset] else {
             let info = "Cannot calculate size offset as index \(offset) is out of bound (data size is \(tlvData.count))"
             print(info)
@@ -51,7 +51,7 @@ public enum SimpleTlvParser {
         }
     }
 
-    static func getValueLenght(data: Data, offset: Int) throws -> Int {
+    public static func getValueLenght(data: Data, offset: Int) throws -> Int {
         func byte(offset: Int) throws -> UInt8 {
             guard let byte = data[safeIndex: offset] else {
                 let info = "Cannot calculate payload size as index \(offset) is out of bound (data size is \(data.count))"
