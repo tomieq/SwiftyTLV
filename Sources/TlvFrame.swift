@@ -9,8 +9,8 @@ import Foundation
 
 // Tag Length Value frame
 public struct TlvFrame {
-    let tag: UInt8
-    let value: Data
+    public let tag: UInt8
+    public let value: Data
 
     init(tag: UInt8, value: Data) {
         self.tag = tag
