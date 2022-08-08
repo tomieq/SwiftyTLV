@@ -12,17 +12,17 @@ public struct TlvFrame {
     public let tag: UInt8
     public let value: Data
 
-    init(tag: UInt8, value: Data) {
+    public init(tag: UInt8, value: Data) {
         self.tag = tag
         self.value = value
     }
 
-    init(tag: UInt8, value: UInt8) {
+    public init(tag: UInt8, value: UInt8) {
         self.tag = tag
         self.value = value.data
     }
 
-    init(tag: UInt8, hexString: String) {
+    public init(tag: UInt8, hexString: String) {
         self.tag = tag
         self.value = Data(hexString: hexString)
     }
