@@ -30,7 +30,8 @@ class SimpleTlvParserTests: XCTestCase {
 
     func test_calculatingSize() throws {
         func getSize(_ hexString: String) throws -> Int {
-            try SimpleTlvParser.getValueLenght(data: Data(hexString: hexString), offset: 0)
+            var data = Data(hexString: hexString)
+            return try SimpleTlvParser.getLenght(data: &data)
         }
 
         XCTAssertEqual(try getSize("0"), 0)
@@ -71,13 +72,13 @@ class SimpleTlvParserTests: XCTestCase {
         let valueLenght = 127
         let payload = Data.random(length: valueLenght)
         let tlv = TlvFrame(tag: 0xBA, value: payload)
-        XCTAssertEqual(SimpleTlvParser.serialize(tlv).hexString, "BA\(valueLenght.byte.hexString)\(payload.hexString)")
+        XCTAssertEqual(SimpleTlvParser.serialize(tlv).hexString, "BA7F\(payload.hexString)")
     }
 
     func test_serializeLongByteTLV() {
         let valueLenght = 0x1AA
         let payload = Data.random(length: valueLenght)
         let tlv = TlvFrame(tag: 0xBA, value: payload)
-        XCTAssertEqual(SimpleTlvParser.serialize(tlv).hexString, "BAFF\(valueLenght.hexString)\(payload.hexString)")
+        XCTAssertEqual(SimpleTlvParser.serialize(tlv).hexString, "BAFF01AA\(payload.hexString)")
     }
 }

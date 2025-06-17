@@ -7,28 +7,19 @@
 
 import Foundation
 
-public enum SimpleTlvParserError: Error {
-    case invalidData(String)
-}
-
 public enum SimpleTlvParser {
     public static func parse(data: Data) throws -> [TlvFrame] {
         var result = [TlvFrame]()
-
-        var index: Int = 0
-        while index < data.count {
-            let tag: UInt8 = data[index]
-            index += 1
+        var data = data
+        while data.isEmpty.not {
+            let tag = try data.consume(bytes: 1).uInt8
             do {
-                let payloadSize = try self.getValueLenght(data: data, offset: index)
-                index += try self.getLengthOffset(tlvData: data, offset: index)
-                if payloadSize > 0 {
-                    let payload = try data.subArray(offset: index, length: payloadSize)
+                let lenght = try self.getLenght(data: &data)
+                if lenght > 0 {
+                    let payload = data.consume(bytes: lenght)
                     let frame = TlvFrame(tag: tag, value: payload)
                     result.append(frame)
                 }
-
-                index += payloadSize
             } catch {
                 print("Problem while parsing tag \(tag.hexString)")
                 throw error
@@ -37,41 +28,14 @@ public enum SimpleTlvParser {
         return result
     }
 
-    public static func getLengthOffset(tlvData: Data, offset: Int) throws -> Int {
-        guard let data = tlvData[safeIndex: offset] else {
-            let info = "Cannot calculate size offset as index \(offset) is out of bound (data size is \(tlvData.count))"
-            print(info)
-            throw SimpleTlvParserError.invalidData(info)
-        }
-        switch data {
-        case 0xFF:
-            return 3
-        default:
-            return 1
-        }
-    }
+    public static func getLenght(data: inout Data) throws -> Int {
+        let prefix = data.consume(bytes: 1)
 
-    public static func getValueLenght(data: Data, offset: Int) throws -> Int {
-        func byte(offset: Int) throws -> UInt8 {
-            guard let byte = data[safeIndex: offset] else {
-                let info = "Cannot calculate payload size as index \(offset) is out of bound (data size is \(data.count))"
-                print(info)
-                throw SimpleTlvParserError.invalidData(info)
-            }
-            return byte
-        }
-        let prefix = try byte(offset: offset)
-
-        switch prefix {
+        switch try prefix.uInt8 {
         case 0xFF:
-            let size1 = try byte(offset: offset + 1)
-            let size2 = try byte(offset: offset + 2)
-            var data = Data()
-            data.append(size1)
-            data.append(size2)
-            return data.int
+            return try data.consume(bytes: 2).int
         default:
-            return prefix.int
+            return try prefix.int
         }
     }
 
@@ -80,12 +44,12 @@ public enum SimpleTlvParser {
         var resultData: Data = Data()
 
         if (length < 0xFF) {
-            resultData.append(length.byte)
+            resultData.append(UInt8(length))
             return resultData
         }
 
         resultData.append(0xFF)
-        resultData.append(length.data)
+        resultData.append(UInt16(length).data)
         return resultData
     }
 
