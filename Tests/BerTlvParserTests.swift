@@ -12,15 +12,15 @@ class BerTlvParserTests: XCTestCase {
     func test_parseOneTLV() throws {
         let tlv = Data(hexString: "18022ABC")
         let parsed = try BerTlvParser.parse(data: tlv)
-        XCTAssertEqual(parsed.first{ $0.tag == 0x18 }?.value.hexString, "2ABC")
+        XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x18 }?.value.hexString, "2ABC")
     }
 
     func test_parseMultipleTLV() throws {
         var data = Data(hexString: "18022ABC")
         data.append(Data(hexString: "9002EBCA"))
         let parsed = try BerTlvParser.parse(data: data)
-        XCTAssertEqual(parsed.first{ $0.tag == 0x18 }?.value.hexString, "2ABC")
-        XCTAssertEqual(parsed.first{ $0.tag == 0x90 }?.value.hexString, "EBCA")
+        XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x18 }?.value.hexString, "2ABC")
+        XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x90 }?.value.hexString, "EBCA")
     }
 
 //    func test_parseMultipleTLVGluedWithZeroes() throws {
@@ -41,8 +41,8 @@ class BerTlvParserTests: XCTestCase {
         data.append(Data(hexString: "998301EA60"))
         data.append(tlvPayload2)
         let parsed = try BerTlvParser.parse(data: data)
-        XCTAssertEqual(parsed.first{ $0.tag == 0x33 }?.value, tlvPayload1)
-        XCTAssertEqual(parsed.first{ $0.tag == 0x99 }?.value, tlvPayload2)
+        XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x33 }?.value, tlvPayload1)
+        XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x99 }?.value, tlvPayload2)
     }
 
     func test_calculatingSize() throws {

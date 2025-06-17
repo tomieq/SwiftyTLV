@@ -12,7 +12,7 @@ class SimpleTlvParserTests: XCTestCase {
     func test_parseOneTLV() throws {
         let tlv = Data(hexString: "18022ABC")
         let parsed = try SimpleTlvParser.parse(data: tlv)
-        XCTAssertEqual(parsed.first{ $0.tag == 0x18 }?.value.hexString, "2ABC")
+        XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x18 }?.value.hexString, "2ABC")
     }
 
     func test_parseMultipleTLV() throws {
@@ -24,8 +24,8 @@ class SimpleTlvParserTests: XCTestCase {
         data.append(Data(hexString: "6EFF89AB"))
         data.append(tlvPayload2)
         let parsed = try SimpleTlvParser.parse(data: data)
-        XCTAssertEqual(parsed.first{ $0.tag == 0xCA }?.value, tlvPayload1)
-        XCTAssertEqual(parsed.first{ $0.tag == 0x6E }?.value, tlvPayload2)
+        XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0xCA }?.value, tlvPayload1)
+        XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x6E }?.value, tlvPayload2)
     }
 
     func test_calculatingSize() throws {

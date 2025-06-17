@@ -9,11 +9,11 @@ import Foundation
 import SwiftExtensions
 
 public enum BerTlvParser {
-    public static func parse(data: Data) throws -> [TlvFrame] {
+    public static func parse(data: Data, tagLength: Int = 1) throws -> [TlvFrame] {
         var result: [TlvFrame] = []
         var data = data
         while data.isEmpty.not {
-            let tag = try data.consume(bytes: 1).uInt8
+            let tag = data.consume(bytes: tagLength)
             do {
                 let length = try self.getLength(data: &data)
                 if length > 0 {
@@ -68,7 +68,7 @@ public enum BerTlvParser {
 
     public static func serialize(_ tlv: TlvFrame) -> Data {
         var data = Data()
-        data.append(tlv.tag.data)
+        data.append(tlv.tag)
         data.append(self.makeValueLength(value: tlv.value))
         data.append(tlv.value)
         return data

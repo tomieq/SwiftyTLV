@@ -12,7 +12,7 @@ public enum SimpleTlvParser {
         var result = [TlvFrame]()
         var data = data
         while data.isEmpty.not {
-            let tag = try data.consume(bytes: 1).uInt8
+            let tag = data.consume(bytes: 1)
             do {
                 let lenght = try self.getLenght(data: &data)
                 if lenght > 0 {

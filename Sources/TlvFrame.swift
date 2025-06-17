@@ -4,11 +4,34 @@
 //
 //  Created by Tomasz Kucharski on 06/08/2022.
 //
+import Foundation
 
+public struct TlvFrame {
+    public let tag: Data
+    public let value: Data
 
-extension UInt8: DataConvertible {}
-extension UInt16: DataConvertible {}
+    public init(tag: Data, value: Data) {
+        self.tag = tag
+        self.value = value
+    }
 
-// Tag Length Value frame
-public typealias TlvFrame = TlvBox<UInt8>
-public typealias TlvFrame16 = TlvBox<UInt16>
+    public init(tag: Data, hexString: String) {
+        self.tag = tag
+        self.value = Data(hexString: hexString)
+    }
+    
+    public init(tag: String, hexString: String) {
+        self.tag = Data(hexString: tag)
+        self.value = Data(hexString: hexString)
+    }
+    
+    public init(tag: UInt8, hexString: String) {
+        self.tag = tag.data
+        self.value = Data(hexString: hexString)
+    }
+    
+    public init(tag: UInt8, value: Data) {
+        self.tag = tag.data
+        self.value = value
+    }
+}
