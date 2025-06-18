@@ -1,5 +1,5 @@
 //
-//  TLVParserTests.swift
+//  BerTlvTests.swift
 //
 //
 //  Created by Tomasz Kucharski on 06/08/2022.
@@ -8,16 +8,31 @@
 import XCTest
 @testable import SwiftyTLV
 
-class BerTlvParserTests: XCTestCase {
+class BerTlvTests: XCTestCase {
     func test_parseOneTLV() throws {
         let tlv = Data(hexString: "18022ABC")
-        let parsed = try BerTlvParser.parse(data: tlv)
-        XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x18 }?.value.hexString, "2ABC")
+        let parsed = try BerTlv.from(data: tlv)
+        XCTAssertEqual(try parsed.tag.uInt8, 0x18)
+        XCTAssertEqual(parsed.value.hexString, "2ABC")
+    }
+    
+    func test_parseOneTLVFixedTagLenght1() throws {
+        let tlv = Data(hexString: "18022ABC")
+        let parsed = try BerTlv.from(data: tlv, tagLength: .fixed(1))
+        XCTAssertEqual(try parsed.tag.uInt8, 0x18)
+        XCTAssertEqual(parsed.value.hexString, "2ABC")
+    }
+    
+    func test_parseOneTLVFixedTagLenght2() throws {
+        let tlv = Data(hexString: "18A0022ABC")
+        let parsed = try BerTlv.from(data: tlv, tagLength: .fixed(2))
+        XCTAssertEqual(try parsed.tag.uInt16, 0x18A0)
+        XCTAssertEqual(parsed.value.hexString, "2ABC")
     }
     
     func test_parseTLVWithLongTags() throws {
         let tlv = Data(hexString: "5F81022ABCBF4F01A0")
-        let parsed = try BerTlvParser.parse(data: tlv)
+        let parsed = try BerTlv.list(data: tlv)
         print(parsed)
         XCTAssertEqual(try parsed.first{ try $0.tag.uInt16 == 0x5f81 }?.value.hexString, "2ABC")
         XCTAssertEqual(try parsed.first{ try $0.tag.uInt16 == 0xBF4F }?.value.hexString, "A0")
@@ -26,19 +41,10 @@ class BerTlvParserTests: XCTestCase {
     func test_parseMultipleTLV() throws {
         var data = Data(hexString: "18022ABC")
         data.append(Data(hexString: "9002EBCA"))
-        let parsed = try BerTlvParser.parse(data: data)
+        let parsed = try BerTlv.list(data: data)
         XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x18 }?.value.hexString, "2ABC")
         XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x90 }?.value.hexString, "EBCA")
     }
-
-//    func test_parseMultipleTLVGluedWithZeroes() throws {
-//        var data = Data(hexString: "18022ABC")
-//        data.append(Data(repeating: 0, count: 11))
-//        data.append(Data(hexString: "9002EBCA"))
-//        let parsed = try BerTlvParser.parse(data: data)
-//        XCTAssertEqual(parsed.first{ $0.tag == 0x18 }?.value.hexString, "2ABC")
-//        XCTAssertEqual(parsed.first{ $0.tag == 0x90 }?.value.hexString, "EBCA")
-//    }
 
     func test_parseMultipleLongTLV() throws {
         let tlvPayload1 = Data.random(length: 0x78)
@@ -48,7 +54,7 @@ class BerTlvParserTests: XCTestCase {
         data.append(tlvPayload1)
         data.append(Data(hexString: "998301EA60"))
         data.append(tlvPayload2)
-        let parsed = try BerTlvParser.parse(data: data)
+        let parsed = try BerTlv.list(data: data)
         XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x33 }?.value, tlvPayload1)
         XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x99 }?.value, tlvPayload2)
     }
@@ -56,7 +62,7 @@ class BerTlvParserTests: XCTestCase {
     func test_calculatingSize() throws {
         func getSize(_ hexString: String) throws -> Int {
             var data = Data(hexString: hexString)
-            return try BerTlvParser.getLength(data: &data)
+            return try BerTlv.getLength(data: &data)
         }
 
         XCTAssertEqual(try getSize("0"), 0)
@@ -78,49 +84,49 @@ class BerTlvParserTests: XCTestCase {
 
     func test_makingPayloadSize() throws {
         func makeData(_ size: Int) throws -> String {
-            BerTlvParser.makeValueLength(value: Data(repeating: 0, count: size)).hexString
+            BerTlv(tag: "09", value: Data(repeating: 0, count: size)).data[safeRange: 1...5].hexString
         }
 
         XCTAssertEqual(try makeData(0), "00")
-        XCTAssertEqual(try makeData(1), "01")
-        XCTAssertEqual(try makeData(0x7F), "7F")
-        XCTAssertEqual(try makeData(0xFF), "81FF")
-        XCTAssertEqual(try makeData(0x0100), "820100")
-        XCTAssertEqual(try makeData(0xFFFF), "82FFFF")
-        XCTAssertEqual(try makeData(0x010000), "83010000")
-        XCTAssertEqual(try makeData(0xFFFFFF), "83FFFFFF")
+        XCTAssertEqual(try makeData(1), "0100")
+        XCTAssertEqual(try makeData(0x7F), "7F00000000")
+        XCTAssertEqual(try makeData(0xFF), "81FF000000")
+        XCTAssertEqual(try makeData(0x0100), "8201000000")
+        XCTAssertEqual(try makeData(0xFFFF), "82FFFF0000")
+        XCTAssertEqual(try makeData(0x010000), "8301000000")
+        XCTAssertEqual(try makeData(0xFFFFFF), "83FFFFFF00")
         XCTAssertEqual(try makeData(0xFFFFFFFF), "84FFFFFFFF")
         XCTAssertEqual(try makeData(0x01000000), "8401000000")
     }
 
     func test_serializeOneByteTLV() {
-        let tlv = TlvFrame(tag: 0xCC, hexString: "EB")
-        XCTAssertEqual(BerTlvParser.serialize(tlv).hexString, "CC01EB")
+        let tlv = BerTlv(tag: "CC", value: "EB")
+        XCTAssertEqual(tlv.data.hexString, "CC01EB")
     }
 
     func test_serializeTwoByteTLV() {
-        let tlv = TlvFrame(tag: 0xFF, hexString: "EBAC")
-        XCTAssertEqual(BerTlvParser.serialize(tlv).hexString, "FF02EBAC")
+        let tlv = BerTlv(tag: "FF", value: "EBAC")
+        XCTAssertEqual(tlv.data.hexString, "FF02EBAC")
     }
 
     func test_serialize127ByteTLV() {
         let valueLenght = 127
         let payload = Data.random(length: valueLenght)
-        let tlv = TlvFrame(tag: 0xBA, value: payload)
-        XCTAssertEqual(BerTlvParser.serialize(tlv).hexString, "BA7F\(payload.hexString)")
+        let tlv = BerTlv(tag: "BA", value: payload)
+        XCTAssertEqual(tlv.data.hexString, "BA7F\(payload.hexString)")
     }
 
     func test_serialize128ByteTLV() {
         let valueLenght = 128
         let payload = Data.random(length: valueLenght)
-        let tlv = TlvFrame(tag: 0xBA, value: payload)
-        XCTAssertEqual(BerTlvParser.serialize(tlv).hexString, "BA8180\(payload.hexString)")
+        let tlv = BerTlv(tag: "BA", value: payload)
+        XCTAssertEqual(tlv.data.hexString, "BA8180\(payload.hexString)")
     }
 
     func test_serialize65535ByteTLV() {
         let valueLenght = 65535
         let payload = Data.random(length: valueLenght)
-        let tlv = TlvFrame(tag: 0xCA, value: payload)
-        XCTAssertEqual(BerTlvParser.serialize(tlv).hexString, "CA82FFFF\(payload.hexString)")
+        let tlv = BerTlv(tag: "CA", value: payload)
+        XCTAssertEqual(tlv.data.hexString, "CA82FFFF\(payload.hexString)")
     }
 }

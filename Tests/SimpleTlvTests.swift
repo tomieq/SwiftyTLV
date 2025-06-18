@@ -1,5 +1,5 @@
 //
-//  SimpleTlvParserTests.swift
+//  SimpleTlvTests.swift
 //
 //
 //  Created by Tomasz Kucharski on 06/08/2022.
@@ -8,11 +8,12 @@
 import XCTest
 @testable import SwiftyTLV
 
-class SimpleTlvParserTests: XCTestCase {
+class SimpleTlvTests: XCTestCase {
     func test_parseOneTLV() throws {
         let tlv = Data(hexString: "18022ABC")
-        let parsed = try SimpleTlvParser.parse(data: tlv)
-        XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x18 }?.value.hexString, "2ABC")
+        let parsed = try SimpleTlv.from(data: tlv)
+        XCTAssertEqual(parsed.tag, 0x18)
+        XCTAssertEqual(parsed.value.hexString, "2ABC")
     }
 
     func test_parseMultipleTLV() throws {
@@ -23,15 +24,15 @@ class SimpleTlvParserTests: XCTestCase {
         data.append(tlvPayload1)
         data.append(Data(hexString: "6EFF89AB"))
         data.append(tlvPayload2)
-        let parsed = try SimpleTlvParser.parse(data: data)
-        XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0xCA }?.value, tlvPayload1)
-        XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x6E }?.value, tlvPayload2)
+        let parsed = try SimpleTlv.list(data: data)
+        XCTAssertEqual(parsed.first{ $0.tag == 0xCA }?.value, tlvPayload1)
+        XCTAssertEqual(parsed.first{ $0.tag == 0x6E }?.value, tlvPayload2)
     }
 
     func test_calculatingSize() throws {
         func getSize(_ hexString: String) throws -> Int {
             var data = Data(hexString: hexString)
-            return try SimpleTlvParser.getLenght(data: &data)
+            return try SimpleTlv.getLenght(data: &data)
         }
 
         XCTAssertEqual(try getSize("0"), 0)
@@ -47,38 +48,38 @@ class SimpleTlvParserTests: XCTestCase {
 
     func test_makingPayloadSize() throws {
         func makeData(_ size: Int) throws -> String {
-            SimpleTlvParser.makeValueLength(payload: Data(repeating: 0, count: size)).hexString
+            SimpleTlv(tag: 0x07, value: Data(repeating: 0, count: size)).data[safeRange: 1...3].hexString
         }
 
         XCTAssertEqual(try makeData(0), "00")
-        XCTAssertEqual(try makeData(1), "01")
-        XCTAssertEqual(try makeData(0x7F), "7F")
+        XCTAssertEqual(try makeData(1), "0100")
+        XCTAssertEqual(try makeData(0x7F), "7F0000")
         XCTAssertEqual(try makeData(0xFF), "FF00FF")
         XCTAssertEqual(try makeData(0x0100), "FF0100")
         XCTAssertEqual(try makeData(0xFFFF), "FFFFFF")
     }
 
     func test_serializeOneByteTLV() {
-        let tlv = TlvFrame(tag: 0xCC, hexString: "EB")
-        XCTAssertEqual(SimpleTlvParser.serialize(tlv).hexString, "CC01EB")
+        let tlv = SimpleTlv(tag: 0xCC, value: "EB")
+        XCTAssertEqual(tlv.data.hexString, "CC01EB")
     }
 
     func test_serializeTwoByteTLV() {
-        let tlv = TlvFrame(tag: 0xFF, hexString: "EBAC")
-        XCTAssertEqual(SimpleTlvParser.serialize(tlv).hexString, "FF02EBAC")
+        let tlv = SimpleTlv(tag: 0xFF, value: "EBAC")
+        XCTAssertEqual(tlv.data.hexString, "FF02EBAC")
     }
 
     func test_serialize127ByteTLV() {
         let valueLenght = 127
         let payload = Data.random(length: valueLenght)
-        let tlv = TlvFrame(tag: 0xBA, value: payload)
-        XCTAssertEqual(SimpleTlvParser.serialize(tlv).hexString, "BA7F\(payload.hexString)")
+        let tlv = SimpleTlv(tag: 0xBA, value: payload)
+        XCTAssertEqual(tlv.data.hexString, "BA7F\(payload.hexString)")
     }
 
     func test_serializeLongByteTLV() {
         let valueLenght = 0x1AA
         let payload = Data.random(length: valueLenght)
-        let tlv = TlvFrame(tag: 0xBA, value: payload)
-        XCTAssertEqual(SimpleTlvParser.serialize(tlv).hexString, "BAFF01AA\(payload.hexString)")
+        let tlv = SimpleTlv(tag: 0xBA, value: payload)
+        XCTAssertEqual(tlv.data.hexString, "BAFF01AA\(payload.hexString)")
     }
 }
