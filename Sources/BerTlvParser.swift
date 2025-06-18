@@ -8,12 +8,33 @@
 import Foundation
 import SwiftExtensions
 
+public enum BerTagLength {
+    case auto
+    case fixed(Int)
+}
+
 public enum BerTlvParser {
-    public static func parse(data: Data, tagLength: Int = 1) throws -> [TlvFrame] {
-        var result: [TlvFrame] = []
+    public static func parse(data: Data, tagLength: BerTagLength = .auto) throws -> [TlvFrame] {
         var data = data
+        func tag() -> Data {
+            switch tagLength {
+            case .auto:
+                var tag = data.consume(bytes: 1)
+                if try! tag.uInt8.isBitSet(mask: 0x1F) {
+                    tag.append(data.consume(bytes: 1))
+                    while data[safeIndex: 0].or(0).isBitSet(mask: 0x80) {
+                        tag.append(data.consume(bytes: 1))
+                    }
+                }
+                return tag
+            case .fixed(let size):
+               return data.consume(bytes: size)
+            }
+        }
+        var result: [TlvFrame] = []
+        
         while data.isEmpty.not {
-            let tag = data.consume(bytes: tagLength)
+            let tag = tag()
             do {
                 let length = try self.getLength(data: &data)
                 if length > 0 {

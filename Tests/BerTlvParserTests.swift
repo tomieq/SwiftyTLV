@@ -14,6 +14,14 @@ class BerTlvParserTests: XCTestCase {
         let parsed = try BerTlvParser.parse(data: tlv)
         XCTAssertEqual(try parsed.first{ try $0.tag.uInt8 == 0x18 }?.value.hexString, "2ABC")
     }
+    
+    func test_parseTLVWithLongTags() throws {
+        let tlv = Data(hexString: "5F81022ABCBF4F01A0")
+        let parsed = try BerTlvParser.parse(data: tlv)
+        print(parsed)
+        XCTAssertEqual(try parsed.first{ try $0.tag.uInt16 == 0x5f81 }?.value.hexString, "2ABC")
+        XCTAssertEqual(try parsed.first{ try $0.tag.uInt16 == 0xBF4F }?.value.hexString, "A0")
+    }
 
     func test_parseMultipleTLV() throws {
         var data = Data(hexString: "18022ABC")
