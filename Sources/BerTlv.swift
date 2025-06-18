@@ -12,9 +12,10 @@ public enum BerTagLength {
     case fixed(Int)
 }
 
-public struct BerTlv {
+public class BerTlv {
     public let tag: Data
     public let value: Data
+    public lazy var tagInfo = try? TagInfo(data: tag)
 
     public init(tag: Data, value: Data) {
         self.tag = tag
