@@ -98,9 +98,11 @@ extension BerTlv {
             case .auto:
                 var tag = data.consume(bytes: 1)
                 if try tag.uInt8.isBitSet(mask: 0x1F) {
-                    tag.append(data.consume(bytes: 1))
-                    while data[safeIndex: 0].or(0).isBitSet(mask: 0x80) {
-                        tag.append(data.consume(bytes: 1))
+                    var next = data.consume(bytes: 1)
+                    tag.append(next)
+                    while try next.uInt8.isBitSet(mask: 0x80).and(data.isEmpty.not) {
+                        next = data.consume(bytes: 1)
+                        tag.append(next)
                     }
                 }
                 return tag

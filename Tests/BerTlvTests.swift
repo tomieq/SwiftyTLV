@@ -29,13 +29,21 @@ class BerTlvTests: XCTestCase {
         XCTAssertEqual(try parsed.tag.uInt16, 0x18A0)
         XCTAssertEqual(parsed.value.hexString, "2ABC")
     }
+
+    func test_parseTLVWithLongTag() throws {
+        let tlv = Data(hexString: "BF4F8101AA")
+        let parsed = try BerTlv.from(data: tlv)
+        print(parsed)
+        XCTAssertEqual(parsed.tag.hexString, "BF4F")
+        XCTAssertEqual(parsed.value.hexString, "AA")
+    }
     
     func test_parseTLVWithLongTags() throws {
-        let tlv = Data(hexString: "5F81022ABCBF4F01A0")
-        let parsed = try BerTlv.list(data: tlv)
+        let data = Data(hexString: "5C81022ABCBF4F8101A0")
+        let parsed = try BerTlv.list(data: data)
         print(parsed)
-        XCTAssertEqual(try parsed.first{ try $0.tag.uInt16 == 0x5f81 }?.value.hexString, "2ABC")
-        XCTAssertEqual(try parsed.first{ try $0.tag.uInt16 == 0xBF4F }?.value.hexString, "A0")
+        XCTAssertEqual(parsed.first{ $0.tag.hexString == "5C" }?.value.hexString, "2ABC")
+        XCTAssertEqual(parsed.first{ $0.tag.hexString == "BF4F" }?.value.hexString, "A0")
     }
 
     func test_parseMultipleTLV() throws {
