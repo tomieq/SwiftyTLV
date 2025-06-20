@@ -42,8 +42,22 @@ let data = tlv.data
 When decoding, you can either let the engine obtain the number of tags according to BER specs or set it to fixed width. By default is `auto`. 
 ```swift
 let data = Data(hexString: "18022ABC")
-let tlv = try BerTlv.from(data: tlv)
-let tlv = try BerTlv.from(data: tlv, tagLength: .fixed(1))
-let tlvs = try SimpleTlv.list(data: tlv)
-let tlvs = try SimpleTlv.list(data: tlv, tagLength: .fixed(1))
+let tlv = try BerTlv.from(data: data)
+let tlv = try BerTlv.from(data: data, tagLength: .fixed(1))
+let tlvs = try BerTlv.list(data: data)
+let tlvs = try BerTlv.list(data: data, tagLength: .fixed(1))
+```
+
+## OID
+Library has in-build `OID` encoder and decoder.
+
+You can make TLV payload with:
+```swift
+let tlv = BerTlv(tag: "06", value: OID.encode("1.2.62329.4"))
+```
+
+When you created `BerTlv` from binary data, you can obtain it's OID with code:
+```swift
+let tlv = try BerTlv.from(data: data)
+let oid = tlv.oid
 ```
