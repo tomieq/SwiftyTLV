@@ -34,6 +34,13 @@ public struct TagInfo {
         self.tagType = TagType(rawValue: self.number)
     }
     
+    public init(class klazz: Class, form: Form, type: TagType) {
+        self.class = klazz
+        self.form = form
+        self.number = type.rawValue
+        self.tagType = type
+    }
+    
     public init?(data: Data) throws {
         if data.isEmpty {
             return nil
