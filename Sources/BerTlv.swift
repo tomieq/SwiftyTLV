@@ -17,9 +17,9 @@ public class BerTlv {
     public let value: Data
     public lazy var tagInfo = try? TagInfo(data: tag)
 
-    public init(tag: Data, value: Data) {
+    public init(tag: Data, value: Data?) {
         self.tag = tag
-        self.value = value
+        self.value = value.or(Data())
     }
 
     public init(tag: Data, value: String) {
@@ -32,9 +32,9 @@ public class BerTlv {
         self.value = Data(hexString: value)
     }
     
-    public init(tag: String, value: Data) {
+    public init(tag: String, value: Data?) {
         self.tag = Data(hexString: tag)
-        self.value = value
+        self.value = value.or(Data())
     }
 }
 
