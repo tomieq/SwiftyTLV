@@ -15,7 +15,7 @@ public enum BerTagLength {
 public class BerTlv {
     public let tag: Data
     public let value: Data
-    public lazy var tagInfo = try? TagInfo(data: tag)
+    public lazy var tagInfo = (try? TagInfo(data: tag)) ?? TagInfo(class: .universal, form: .primitive, type: .null)
 
     public init(tag: Data, value: Data?) {
         self.tag = tag

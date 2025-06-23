@@ -7,7 +7,7 @@
 
 public extension BerTlv {
     var oid: String? {
-        guard tagInfo?.tagType == .objectIdentifier else {
+        guard tagInfo.tagType == .objectIdentifier else {
             return nil
         }
         return OID.decode(value)
