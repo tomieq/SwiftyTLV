@@ -137,4 +137,14 @@ class BerTlvTests: XCTestCase {
         let tlv = BerTlv(tag: "CA", value: payload)
         XCTAssertEqual(tlv.data.hexString, "CA82FFFF\(payload.hexString)")
     }
+    
+    func test_initWithTagInfo() throws {
+        let tlv = BerTlv(tagInfo: .BOOLEAN, value: "01")
+        XCTAssertEqual(tlv.tagInfo.form, .primitive)
+        XCTAssertEqual(tlv.tagInfo.class, .universal)
+        XCTAssertEqual(tlv.tagInfo.tagType, .boolean)
+        XCTAssertEqual(tlv.value.hexString, "01")
+    }
+    
+    
 }

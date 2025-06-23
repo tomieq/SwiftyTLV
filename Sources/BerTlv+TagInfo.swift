@@ -14,4 +14,8 @@ public extension BerTlv {
     convenience init(tagInfo: TagInfo, value: Data?) {
         self.init(tag: tagInfo.data, value: value)
     }
+    
+    convenience init(tagInfo: TagInfo, value: String) {
+        self.init(tag: tagInfo.data, value: value)
+    }
 }
