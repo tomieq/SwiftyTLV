@@ -98,7 +98,7 @@ public struct TagInfo {
 
 extension TagInfo: CustomStringConvertible {
     private var readableType: String {
-        if let tagType {
+        if let tagType, self.class == .universal {
             ", Type: \(tagType)"
         } else {
             ""
