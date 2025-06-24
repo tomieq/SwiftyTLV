@@ -38,6 +38,14 @@ let tlvs = try SimpleTlv.list(data: tlv)
 let tlv = BerTlv(tag: "BF89", value: Data([0x0A, 0x87])
 let data = tlv.data
 ```
+
+#### Encoding with `TagInfo`
+```swift
+let tlv = BerTlv(tag: TagInfo(class: .contextSpecific, form: .constructed, type: .bitString), value: Data([0x34])
+let tlv = BerTlv(tag: .CONTEXT_SPECIFIC(.bitString), value: Data([0x34]))
+let tlv = BerTlv(tag: .BOOLEAN, value: Data([0x01])
+```
+
 #### Decoding
 When decoding, you can either let the engine obtain the number of tags according to BER specs or set it to fixed width. By default is `auto`. 
 ```swift

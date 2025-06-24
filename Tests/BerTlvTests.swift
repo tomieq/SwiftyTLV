@@ -139,7 +139,7 @@ class BerTlvTests: XCTestCase {
     }
     
     func test_initWithTagInfo() throws {
-        let tlv = BerTlv(tagInfo: .BOOLEAN, value: "01")
+        let tlv = BerTlv(tag: .BOOLEAN, value: "01")
         XCTAssertEqual(tlv.tagInfo.form, .primitive)
         XCTAssertEqual(tlv.tagInfo.class, .universal)
         XCTAssertEqual(tlv.tagInfo.tagType, .boolean)

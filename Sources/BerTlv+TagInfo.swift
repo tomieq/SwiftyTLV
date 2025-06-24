@@ -8,14 +8,14 @@ import Foundation
 
 public extension BerTlv {
     convenience init(class clas: TagInfo.Class, form: TagInfo.Form, type: TagType, value: Data?) {
-        self.init(tagInfo: TagInfo(class: clas, form: form, type: type), value: value)
+        self.init(tag: TagInfo(class: clas, form: form, type: type), value: value)
     }
 
-    convenience init(tagInfo: TagInfo, value: Data?) {
-        self.init(tag: tagInfo.data, value: value)
+    convenience init(tag: TagInfo, value: Data?) {
+        self.init(tag: tag.data, value: value)
     }
     
-    convenience init(tagInfo: TagInfo, value: String) {
-        self.init(tag: tagInfo.data, value: value)
+    convenience init(tag: TagInfo, values: [BerTlv]) {
+        self.init(tag: tag.data, value: values.reduce(Data(), +))
     }
 }

@@ -17,24 +17,14 @@ public class BerTlv {
     public let value: Data
     public lazy var tagInfo = (try? TagInfo(data: tag)) ?? TagInfo(class: .universal, form: .primitive, type: .null)
 
-    public init(tag: Data, value: Data?) {
-        self.tag = tag
+    public init(tag: DataConvertible, value: Data?) {
+        self.tag = tag.data
         self.value = value.or(Data())
     }
 
-    public init(tag: Data, value: String) {
-        self.tag = tag
+    public init(tag: DataConvertible, value: String) {
+        self.tag = tag.data
         self.value = Data(hexString: value)
-    }
-    
-    public init(tag: String, value: String) {
-        self.tag = Data(hexString: tag)
-        self.value = Data(hexString: value)
-    }
-    
-    public init(tag: String, value: Data?) {
-        self.tag = Data(hexString: tag)
-        self.value = value.or(Data())
     }
 }
 
