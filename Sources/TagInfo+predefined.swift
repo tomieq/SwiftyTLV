@@ -22,4 +22,7 @@ public extension TagInfo {
     static let NUMERIC_STRING = TagInfo(class: .universal, form: .primitive, type: .numericString)
     static let UTF8_STRING = TagInfo(class: .universal, form: .primitive, type: .utf8String)
     static let NULL = TagInfo(class: .universal, form: .primitive, type: .null)
+    static func CONTEXT_SPECIFIC(_ type: TagType) -> TagInfo {
+        TagInfo(class: .contextSpecific, form: .constructed, type: type)
+    }
 }
