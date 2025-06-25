@@ -45,10 +45,10 @@ extension ASN1: CustomStringConvertible {
             case .time(let string):
                 "TIME(\(string))"
             case .sequence(let array):
-                "SEQUENCE [\(array.map { $0.printable(indentation: indentation.incremented) }.joined(separator: ","))\n"
+                "SEQUENCE [\(array.map { $0.printable(indentation: indentation.incremented, showFullValue: showFullValue) }.joined(separator: ","))\n"
                 + String(repeating: "\t", count: indentation) + "]"
             case .set(let array):
-                "SET [\(array.map { $0.printable(indentation: indentation.incremented) }.joined(separator: ","))\n"
+                "SET [\(array.map { $0.printable(indentation: indentation.incremented, showFullValue: showFullValue) }.joined(separator: ","))\n"
                 + String(repeating: "\t", count: indentation) + "]"
             case .numericString(let string):
                 "NUMERIC_STRING(\"\(string)\")"
@@ -73,11 +73,11 @@ extension ASN1: CustomStringConvertible {
             case .contextSpecificPrimitive(let asn1):
                 printableWrapped(name: "CONTEXT_SPECIFIC primitive", asn1: asn1, showFullValue: showFullValue)
             case .contextSpecificConstructed(let tag, let asnList):
-                "CONTEXT_SPECIFIC constructed [\(tag)] (EXPLICIT or CHOICE)\(asnList.map { $0.printable(indentation: indentation.incremented) }.joined())"
+                "CONTEXT_SPECIFIC constructed [\(tag)] (EXPLICIT or CHOICE)\(asnList.map { $0.printable(indentation: indentation.incremented, showFullValue: showFullValue) }.joined())"
             case .applicationPrimitive(let asn1):
                 printableWrapped(name: "APPLICATION primitive", asn1: asn1, showFullValue: showFullValue)
             case .applicationConstructed(let tag, let asnList):
-                "APPLICATION constructed [\(tag)]\(asnList.map { $0.printable(indentation: indentation.incremented) }.joined())"
+                "APPLICATION constructed [\(tag)]\(asnList.map { $0.printable(indentation: indentation.incremented, showFullValue: showFullValue) }.joined())"
             case .customTlv(let tlv):
                 "CUSTOM_TLV(tag: \(tlv.tag.hexString) -> \(tlv.tagInfo), value: \(tlv.value.count.below(33).or(showFullValue) ? tlv.value.hexString : tlv.value.description))"
             }
@@ -96,7 +96,7 @@ extension ASN1: CustomStringConvertible {
     private func printableWrapped(name: String, asn1: ASN1, showFullValue: Bool) -> String {
         asn1.convert {
             if case .customTlv = $0 {
-                asn1.printable(newLine: false)
+                asn1.printable(newLine: false, showFullValue: showFullValue)
             } else {
                 "\(name) \(asn1.printable(newLine: false, showFullValue: showFullValue))"
             }
