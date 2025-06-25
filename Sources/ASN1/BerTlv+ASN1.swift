@@ -53,7 +53,7 @@ extension BerTlv {
             case .boolean:
                     .boolean(try value.uInt8.above(0))
             case .integer:
-                Optional { try value.int }.map { .integer($0) }.or(.customTlv(self))
+                Optional { try value.int }.map { .integer($0) }.or(.binaryInteger(value))
             case .bitString:
                     .bitString(value)
             case .octetString:

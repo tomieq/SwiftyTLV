@@ -16,6 +16,8 @@ extension ASN1: CustomStringConvertible {
             switch self {
             case .integer(let int):
                 "INTEGER(\(int))"
+            case .binaryInteger(let data):
+                "BINARY_INTEGER(\(data.hexString))"
             case .boolean(let bool):
                 "BOOLEAN(\(bool))"
             case .bitString(let data):
