@@ -11,19 +11,19 @@ extension ASN1: CustomStringConvertible {
         printable()
     }
     
-    private func printable(indentation: Int = 0, newLine: Bool = true) -> String {
+    public func printable(indentation: Int = 0, newLine: Bool = true, showFullValue: Bool = false) -> String {
         var desc: String {
             switch self {
             case .integer(let int):
                 "INTEGER(\(int))"
             case .integerRaw(let data):
-                "INTEGER RAW(\(data.hexString))"
+                "INTEGER RAW(\(data.count.below(33).or(showFullValue) ? data.hexString : data.description))"
             case .boolean(let bool):
                 "BOOLEAN(\(bool))"
             case .bitString(let data):
-                "BITSTRING(\(data.count.below(33) ? data.hexString : data.description))"
+                "BITSTRING(\(data.count.below(33).or(showFullValue) ? data.hexString : data.description))"
             case .octetString(let data):
-                decode(name: "OCTET_STRING", data: data, indentation: indentation)
+                decode(name: "OCTET_STRING", data: data, indentation: indentation, showFullValue: showFullValue)
             case .null:
                 "NULL"
             case .objectIdentifier(let string):
@@ -71,34 +71,34 @@ extension ASN1: CustomStringConvertible {
             case .dateTime(let date):
                 "DATE_TIME(\(date))"
             case .contextSpecificPrimitive(let asn1):
-                printableWrapped(name: "CONTEXT_SPECIFIC primitive", asn1: asn1)
+                printableWrapped(name: "CONTEXT_SPECIFIC primitive", asn1: asn1, showFullValue: showFullValue)
             case .contextSpecificConstructed(let tag, let asnList):
                 "CONTEXT_SPECIFIC constructed [\(tag)] (EXPLICIT or CHOICE)\(asnList.map { $0.printable(indentation: indentation.incremented) }.joined())"
             case .applicationPrimitive(let asn1):
-                printableWrapped(name: "APPLICATION primitive", asn1: asn1)
+                printableWrapped(name: "APPLICATION primitive", asn1: asn1, showFullValue: showFullValue)
             case .applicationConstructed(let tag, let asnList):
                 "APPLICATION constructed [\(tag)]\(asnList.map { $0.printable(indentation: indentation.incremented) }.joined())"
             case .customTlv(let tlv):
-                "CUSTOM_TLV(tag: \(tlv.tag.hexString) -> \(tlv.tagInfo), value: \(tlv.value.hexString))"
+                "CUSTOM_TLV(tag: \(tlv.tag.hexString) -> \(tlv.tagInfo), value: \(tlv.value.count.below(33).or(showFullValue) ? tlv.value.hexString : tlv.value.description))"
             }
         }
         return (newLine ? "\n" : "") + String(repeating: "\t", count: indentation) + desc
     }
     
-    private func decode(name: String, data: Data, indentation: Int) -> String {
+    private func decode(name: String, data: Data, indentation: Int, showFullValue: Bool) -> String {
         if let asn = try? BerTlv.from(data: data).asn1 {
-            return "\(name) \(asn.printable(indentation: indentation.incremented))"
+            return "\(name) \(asn.printable(indentation: indentation.incremented, showFullValue: showFullValue))"
         } else {
             return "\(name)(\(data.hexString))"
         }
     }
     
-    private func printableWrapped(name: String, asn1: ASN1) -> String {
+    private func printableWrapped(name: String, asn1: ASN1, showFullValue: Bool) -> String {
         asn1.convert {
             if case .customTlv = $0 {
                 asn1.printable(newLine: false)
             } else {
-                "\(name) \(asn1.printable(newLine: false))"
+                "\(name) \(asn1.printable(newLine: false, showFullValue: showFullValue))"
             }
         }
     }
