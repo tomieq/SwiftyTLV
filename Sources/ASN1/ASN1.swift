@@ -9,7 +9,7 @@ import SwiftExtensions
 
 public indirect enum ASN1 {
     case integer(Int)
-    case binaryInteger(Data) // it's INTEGER, but carry Data
+    case integerRaw(Data) // it's INTEGER, but carry Data
     case boolean(Bool)
     case bitString(Data)
     case octetString(Data)
@@ -59,7 +59,7 @@ extension ASN1 {
             switch self {
             case .integer(let int):
                 BerTlv(tag: .INTEGER, value: int.data)
-            case .binaryInteger(let data):
+            case .integerRaw(let data):
                 BerTlv(tag: .INTEGER, value: data)
             case .boolean(let bool):
                 BerTlv(tag: .BOOLEAN, value: bool ? Data([0xFF]) : Data([0x00]))
