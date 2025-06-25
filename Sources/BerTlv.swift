@@ -12,22 +12,37 @@ public enum BerTagLength {
     case fixed(Int)
 }
 
-public class BerTlv {
+public typealias BerTagType = any Equatable & DataConvertible
+final public class BerTlv {
     public let tag: Data
     public let value: Data
     public lazy var tagInfo = (try? TagInfo(data: tag)) ?? TagInfo(class: .universal, form: .primitive, type: .null)
 
-    public init(tag: DataConvertible, value: Data?) {
+    public init(tag: BerTagType, value: DataConvertible?) {
         self.tag = tag.data
-        self.value = value.or(Data())
+        self.value = (value?.data).or(Data())
     }
 
-    public init(tag: DataConvertible, value: String) {
+    public init(tag: BerTagType, value: String) {
         self.tag = tag.data
         self.value = Data(hexString: value)
     }
+    public required init?(rawValue: Data) {
+        guard let tlv = try? BerTlv.from(data: rawValue) else {
+            return nil
+        }
+        self.tag = tlv.tag
+        self.value = tlv.value
+    }
 }
 
+extension BerTlv: RawRepresentable {
+    public typealias RawValue = Data
+    public var rawValue: Data {
+        self.data
+    }
+}
+extension BerTlv: Equatable {}
 // MARK: encoder
 
 extension BerTlv {

@@ -96,9 +96,13 @@ public struct TagInfo {
     }
 }
 
+extension TagInfo: Equatable {}
+extension TagInfo.Class: Equatable {}
+extension TagInfo.Form: Equatable {}
+
 extension TagInfo: CustomStringConvertible {
     private var readableType: String {
-        if let tagType, self.class == .universal {
+        if let tagType, (self.form == .primitive).or(self.class == .universal) {
             ", Type: \(tagType)"
         } else {
             ""
@@ -134,4 +138,10 @@ extension TagInfo.Form: CustomStringConvertible {
         }
     }
     
+}
+
+extension TagInfo {
+    func with(class c: TagInfo.Class? = nil, form: TagInfo.Form? = nil) -> TagInfo {
+        TagInfo(class: c.or(self.class), form: form.or(self.form), number: self.number)
+    }
 }

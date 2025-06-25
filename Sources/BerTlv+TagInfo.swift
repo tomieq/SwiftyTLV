@@ -11,7 +11,7 @@ public extension BerTlv {
         self.init(tag: TagInfo(class: clas, form: form, type: type), value: value)
     }
 
-    convenience init(tag: TagInfo, value: Data?) {
+    convenience init(tag: TagInfo, value: Data? = nil) {
         self.init(tag: tag.data, value: value)
     }
     
