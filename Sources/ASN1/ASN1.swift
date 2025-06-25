@@ -43,6 +43,10 @@ public indirect enum ASN1 {
     public init(tlv: BerTlv) throws {
         self = try tlv.asn1
     }
+    
+    public init(data: Data) throws {
+        self = try BerTlv.from(data: data).asn1
+    }
 }
 
 extension ASN1: Equatable {}
