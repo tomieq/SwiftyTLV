@@ -69,3 +69,48 @@ When you created `BerTlv` from binary data, you can obtain it's OID with code:
 let tlv = try BerTlv.from(data: data)
 let oid = tlv.oid
 ```
+
+## ASN1
+Library can read/parse TLV Data structures that are valid ASN1 schema. `ASN1` enum is a convienience wrapper for `BerTLV`.
+
+```swift
+let asn = try ASN1(data: data)
+print(asn) // powerful printing capabilities
+print(asn.printable(showFullValue: true)) // will dump all hex values even if they are long
+```
+
+Building ASN1 structure:
+```swift
+try ASN1.sequence([
+    .integer(1),
+    .octetString(privateKey),
+    .contextSpecificConstructed(tag: 0, [
+        .objectIdentifier("1.3.132.0.10")
+    ]),
+    .contextSpecificConstructed(tag: 1, [
+        .bitString(publicKey)
+    ])
+])
+```
+
+### Swift Package Manager.
+```swift
+import PackageDescription
+
+let package = Package(
+    name: "AppName",
+    dependencies: [
+        .package(url: "https://github.com/tomieq/SwiftyTLV", .upToNextMajor(from: "1.0.0"))
+    ]
+)
+```
+in the target:
+```swift
+    targets: [
+        .executableTarget(
+            name: "AppName",
+            dependencies: [
+                .product(name: "SwiftyTLV", package: "SwiftyTLV")
+            ])
+    ]
+```
