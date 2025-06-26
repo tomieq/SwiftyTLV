@@ -156,8 +156,6 @@ extension ASN1 {
     }
 }
 
-extension String: @retroactive Convertible {}
-extension Data: @retroactive Convertible {}
 extension ASN1: Convertible {}
 fileprivate extension Int {
     var timeOfDay: String {
