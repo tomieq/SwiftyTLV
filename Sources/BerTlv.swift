@@ -11,6 +11,9 @@ public enum BerTagLength {
     case auto
     case fixed(Int)
 }
+public enum BerTlvDecodeError: Error {
+    case dataNotConsumed(left: Int)
+}
 
 public typealias BerTagType = any Equatable & DataConvertible
 final public class BerTlv {
@@ -95,7 +98,11 @@ extension BerTlv {
     
     public static func from(data: Data, tagLength: BerTagLength = .auto) throws -> BerTlv {
         var data = data
-        return try Self.make(data: &data, tagLength: tagLength)
+        let tlv = try make(data: &data, tagLength: tagLength)
+        guard data.isEmpty else {
+            throw BerTlvDecodeError.dataNotConsumed(left: data.count)
+        }
+        return tlv
     }
     
     private static func make(data: inout Data, tagLength: BerTagLength) throws -> BerTlv {
