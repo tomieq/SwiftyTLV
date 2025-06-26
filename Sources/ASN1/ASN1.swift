@@ -12,7 +12,8 @@ public indirect enum ASN1 {
     case integerRaw(Data) // it's INTEGER, but carry Data
     case boolean(Bool)
     case bitString(Data)
-    case octetString(Data)
+    case octetString(ASN1)
+    case octetStringRaw(Data)
     case null
     case objectIdentifier(String)
     case objectDescriptor(String)
@@ -65,7 +66,9 @@ extension ASN1 {
                 BerTlv(tag: .BOOLEAN, value: bool ? Data([0xFF]) : Data([0x00]))
             case .bitString(let data):
                 BerTlv(tag: .BITSTRING, value: data)
-            case .octetString(let data):
+            case .octetString(let asn):
+                BerTlv(tag: .OCTET_STRING, value: try asn.data)
+            case .octetStringRaw(let data):
                 BerTlv(tag: .OCTET_STRING, value: data)
             case .null:
                 BerTlv(tag: .NULL)

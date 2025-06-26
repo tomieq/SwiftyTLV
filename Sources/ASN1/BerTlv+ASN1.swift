@@ -32,7 +32,6 @@ extension BerTlv {
                         .contextSpecificConstructed(tag: tagInfo.number,
                                                     try BerTlv.list(data: value).map { try $0.asn1 })
                 }
-                   
             case .application:
                 switch tagInfo.form {
                 case .primitive:
@@ -41,7 +40,6 @@ extension BerTlv {
                         .applicationConstructed(tag: tagInfo.number,
                                                 try BerTlv.list(data: value).map { try $0.asn1 })
                 }
-                    
             default:
                 try primitive
             }
@@ -57,7 +55,9 @@ extension BerTlv {
             case .bitString:
                     .bitString(value)
             case .octetString:
-                    .octetString(value)
+                Optional { try ASN1(data: value) }.map {
+                    if case .customTlv = $0 { .octetStringRaw(value) } else { .octetString($0) }
+                }.or(.octetStringRaw(value))
             case .null:
                     .null
             case .objectIdentifier:
@@ -77,7 +77,7 @@ extension BerTlv {
             case .enumerated:
                     .enumerated(value)
             case .embeddedPdv:
-                    .embeddedPdv(try ASN1(tlv: BerTlv.from(data: value)))
+                    .embeddedPdv(try ASN1(data: value))
             case .utf8String:
                     .utf8String(try String(data: value, encoding: .utf8)
                         .orThrow(ASN1Error.invalidUTF8StringValue)

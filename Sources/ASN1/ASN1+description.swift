@@ -22,8 +22,10 @@ extension ASN1: CustomStringConvertible {
                 "BOOLEAN(\(bool))"
             case .bitString(let data):
                 "BITSTRING(\(data.count.below(33).or(showFullValue) ? data.hexString : data.description))"
-            case .octetString(let data):
-                decode(name: "OCTET_STRING", data: data, indentation: indentation, showFullValue: showFullValue)
+            case .octetString(let asn):
+                "OCTET_STRING \(asn.printable(indentation: indentation.incremented, showFullValue: showFullValue))"
+            case .octetStringRaw(let data):
+                "OCTET_STRING RAW(\(data.count.below(33).or(showFullValue) ? data.hexString : data.description))"
             case .null:
                 "NULL"
             case .objectIdentifier(let string):
@@ -83,14 +85,6 @@ extension ASN1: CustomStringConvertible {
             }
         }
         return (newLine ? "\n" : "") + String(repeating: "\t", count: indentation) + desc
-    }
-    
-    private func decode(name: String, data: Data, indentation: Int, showFullValue: Bool) -> String {
-        if let asn = try? BerTlv.from(data: data).asn1 {
-            return "\(name) \(asn.printable(indentation: indentation.incremented, showFullValue: showFullValue))"
-        } else {
-            return "\(name)(\(data.hexString))"
-        }
     }
     
     private func printableWrapped(name: String, asn1: ASN1, showFullValue: Bool) -> String {

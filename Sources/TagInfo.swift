@@ -5,6 +5,7 @@
 //  Created by Tomasz Kucharski on 18/06/2025.
 //
 import Foundation
+import SwiftExtensions
 
 public struct TagInfo {
     public enum Class: UInt8, CaseIterable {
@@ -98,7 +99,7 @@ public struct TagInfo {
 
 extension TagInfo: Equatable {}
 extension TagInfo.Class: Equatable {}
-extension TagInfo.Form: Equatable {}
+extension TagInfo.Form: Equatable, Convertible {}
 
 extension TagInfo: CustomStringConvertible {
     private var readableType: String {
