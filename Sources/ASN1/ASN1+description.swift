@@ -14,18 +14,26 @@ extension ASN1: CustomStringConvertible {
     public func printable(indentation: Int = 0, newLine: Bool = true, showFullValue: Bool = false) -> String {
         var desc: String {
             switch self {
-            case .integer(let int):
-                "INTEGER(\(int))"
-            case .integerRaw(let data):
-                "INTEGER RAW(\(data.count.below(33).or(showFullValue) ? data.hexString : data.description))"
+            case .integer(let data):
+                "INTEGER(\(data.count.below(33).or(showFullValue) ? "0x\(data.hexString)" : data.description))"
             case .boolean(let bool):
                 "BOOLEAN(\(bool))"
             case .bitString(let data):
-                "BITSTRING(\(data.count.below(33).or(showFullValue) ? data.hexString : data.description))"
-            case .octetString(let asn):
-                "OCTET_STRING \(asn.printable(indentation: indentation.incremented, showFullValue: showFullValue))"
-            case .octetStringRaw(let data):
-                "OCTET_STRING RAW(\(data.count.below(33).or(showFullValue) ? data.hexString : data.description))"
+                (data.count.below(33).or(showFullValue) ? "0x\(data.hexString)" : data.description)
+                    .convert { preview in
+                        "BITSTRING(\(preview))"
+                    }
+            case .octetString(let data):
+                (data.count.below(33).or(showFullValue) ? "0x\(data.hexString)" : data.description)
+                    .convert { preview in
+                        "OCTET_STRING(\(preview))"
+                    }.appending(decodeValueIfPossible(raw: data, indentation: indentation.incremented, showFullValue: showFullValue).or(""))
+            case .octetStringFactory(let asn1):
+                asn1.printable(indentation: indentation.incremented, newLine: true, showFullValue: showFullValue)
+                    .convert { preview in
+                        "OCTET_STRING encoded:\(preview)"
+                    }
+                
             case .null:
                 "NULL"
             case .objectIdentifier(let string):
@@ -47,11 +55,15 @@ extension ASN1: CustomStringConvertible {
             case .time(let string):
                 "TIME(\(string))"
             case .sequence(let array):
-                "SEQUENCE [\(array.map { $0.printable(indentation: indentation.incremented, showFullValue: showFullValue) }.joined(separator: ","))\n"
-                + String(repeating: "\t", count: indentation) + "]"
+                array.map { $0.printable(indentation: indentation.incremented, showFullValue: showFullValue) }.joined()
+                    .convert { preview in
+                        "SEQUENCE [\(preview)\n"
+                    }.appending(String(repeating: "\t", count: indentation) + "]")
             case .set(let array):
-                "SET [\(array.map { $0.printable(indentation: indentation.incremented, showFullValue: showFullValue) }.joined(separator: ","))\n"
-                + String(repeating: "\t", count: indentation) + "]"
+                array.map { $0.printable(indentation: indentation.incremented, showFullValue: showFullValue) }.joined()
+                    .convert { preview in
+                        "SET [\(preview)\n"
+                    }.appending(String(repeating: "\t", count: indentation) + "]")
             case .numericString(let string):
                 "NUMERIC_STRING(\"\(string)\")"
             case .printableString(let string):
@@ -81,7 +93,7 @@ extension ASN1: CustomStringConvertible {
             case .applicationConstructed(let tag, let asnList):
                 "APPLICATION constructed [\(tag)]\(asnList.map { $0.printable(indentation: indentation.incremented, showFullValue: showFullValue) }.joined())"
             case .customTlv(let tlv):
-                "CUSTOM_TLV(tag: \(tlv.tag.hexString) -> \(tlv.tagInfo), value: \(tlv.value.count.below(33).or(showFullValue) ? tlv.value.hexString : tlv.value.description))"
+                "CUSTOM_TLV(tag: 0x\(tlv.tag.hexString) -> \(tlv.tagInfo), value: \(tlv.value.count.below(33).or(showFullValue) ? "0x\(tlv.value.hexString)" : tlv.value.description))"
             }
         }
         return (newLine ? "\n" : "") + String(repeating: "\t", count: indentation) + desc
@@ -93,6 +105,16 @@ extension ASN1: CustomStringConvertible {
                 asn1.printable(newLine: false, showFullValue: showFullValue)
             } else {
                 "\(name) \(asn1.printable(newLine: false, showFullValue: showFullValue))"
+            }
+        }
+    }
+    
+    private func decodeValueIfPossible(raw: Data, indentation: Int, showFullValue: Bool) -> String? {
+        Optional { try? ASN1(data: raw) }.map {
+            if case .customTlv = $0 {
+                nil
+            } else {
+                ", encoded:" + $0.printable(indentation: indentation, newLine: true, showFullValue: showFullValue)
             }
         }
     }

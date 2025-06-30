@@ -8,12 +8,11 @@ import Foundation
 import SwiftExtensions
 
 public indirect enum ASN1 {
-    case integer(Int)
-    case integerRaw(Data) // it's INTEGER, but carry Data
+    case integer(Data)
     case boolean(Bool)
     case bitString(Data)
-    case octetString(ASN1)
-    case octetStringRaw(Data)
+    case octetString(Data)
+    case octetStringFactory(ASN1) // convienience enum for building complex structures
     case null
     case objectIdentifier(String)
     case objectDescriptor(String)
@@ -58,18 +57,16 @@ extension ASN1 {
     public var tlv: BerTlv {
         get throws {
             switch self {
-            case .integer(let int):
-                BerTlv(tag: .INTEGER, value: int.data)
-            case .integerRaw(let data):
+            case .integer(let data):
                 BerTlv(tag: .INTEGER, value: data)
             case .boolean(let bool):
                 BerTlv(tag: .BOOLEAN, value: bool ? Data([0xFF]) : Data([0x00]))
             case .bitString(let data):
                 BerTlv(tag: .BITSTRING, value: data)
-            case .octetString(let asn):
-                BerTlv(tag: .OCTET_STRING, value: try asn.data)
-            case .octetStringRaw(let data):
+            case .octetString(let data):
                 BerTlv(tag: .OCTET_STRING, value: data)
+            case .octetStringFactory(let asn1):
+                BerTlv(tag: .OCTET_STRING, value: try asn1.data)
             case .null:
                 BerTlv(tag: .NULL)
             case .objectIdentifier(let string):

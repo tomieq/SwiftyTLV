@@ -6,25 +6,11 @@
 //
 
 import Foundation
-import SwiftExtensions
 
-public enum DataError: Error {
-    case outOfIndex
-}
-
-
-
-extension Data {
-    public func subArray(offset: Int, length: Int) throws -> Data {
-        var result: Data = Data()
-        let rightBoudary = offset + length - 1
-        for index in offset...rightBoudary {
-            guard let _ = self[safeIndex: index] else {
-                print("Cannot get subArray(\(offset), \(length)) as right boundary \(rightBoudary) exceedes data size \(self.count)")
-                throw DataError.outOfIndex
-            }
-            result.append(self[index])
+public extension Data {
+    var asn1: ASN1 {
+        get throws {
+            try ASN1(data: self)
         }
-        return result
     }
 }

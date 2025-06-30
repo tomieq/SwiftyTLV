@@ -51,13 +51,11 @@ extension BerTlv {
             case .boolean:
                     .boolean(try value.uInt8.above(0))
             case .integer:
-                Optional { try value.int }.map { .integer($0) }.or(.integerRaw(value))
+                    .integer(value)
             case .bitString:
                     .bitString(value)
             case .octetString:
-                Optional { try ASN1(data: value) }.map {
-                    if case .customTlv = $0 { .octetStringRaw(value) } else { .octetString($0) }
-                }.or(.octetStringRaw(value))
+                .octetString(value)
             case .null:
                     .null
             case .objectIdentifier:

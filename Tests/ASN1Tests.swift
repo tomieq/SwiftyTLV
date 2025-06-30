@@ -11,7 +11,7 @@ import SwiftyTLV
 struct ASN1Tests {
     @Test
     func integer() throws {
-        let asn = ASN1.integer(0x12)
+        let asn = ASN1.integer(0x12.data)
         let data = Data(hexString: "020112")
         let tlv = try BerTlv.from(data: data)
         #expect(try ASN1(tlv: tlv) == asn)
