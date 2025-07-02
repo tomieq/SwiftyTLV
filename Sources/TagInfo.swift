@@ -110,7 +110,7 @@ extension TagInfo: CustomStringConvertible {
         }
     }
     public var description: String {
-        "Class: \(self.class), Form: \(self.form), Number: \(self.number) [0x\(self.number.hex)]\(readableType)"
+        "Class: \(self.class), Form: \(self.form), Number: 0x\(self.number.data.hexString)(\(self.number))\(readableType)"
     }
 }
 
