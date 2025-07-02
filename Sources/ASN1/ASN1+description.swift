@@ -93,7 +93,7 @@ extension ASN1: CustomStringConvertible {
             case .applicationConstructed(let tag, let asnList):
                 "APPLICATION constructed [\(tag)]\(asnList.map { $0.printable(indentation: indentation.incremented, showFullValue: showFullValue) }.joined())"
             case .customTlv(let tlv):
-                "CUSTOM_TLV(tag: 0x\(tlv.tag.hexString) -> \(tlv.tagInfo), value: \(tlv.value.count.below(33).or(showFullValue) ? "0x\(tlv.value.hexString)" : tlv.value.description))"
+                "CUSTOM_TLV(tag: 0x\(tlv.tag.hexString)(\(Optional {try tlv.tag.int}.or(0))) -> \(tlv.tagInfo), value: \(tlv.value.count.below(33).or(showFullValue) ? "0x\(tlv.value.hexString)" : tlv.value.description))"
             }
         }
         return (newLine ? "\n" : "") + String(repeating: "\t", count: indentation) + desc
