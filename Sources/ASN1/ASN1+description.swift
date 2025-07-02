@@ -22,7 +22,7 @@ extension ASN1: CustomStringConvertible {
                 (data.count.below(33).or(showFullValue) ? "0x\(data.hexString)" : data.description)
                     .convert { preview in
                         "BITSTRING(\(preview))"
-                    }
+                    }.appending(decodeValueIfPossible(raw: data, indentation: indentation.incremented, showFullValue: showFullValue).or(""))
             case .octetString(let data):
                 (data.count.below(33).or(showFullValue) ? "0x\(data.hexString)" : data.description)
                     .convert { preview in
