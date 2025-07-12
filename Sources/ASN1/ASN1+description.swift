@@ -85,11 +85,11 @@ extension ASN1: CustomStringConvertible {
             case .dateTime(let date):
                 "DATE_TIME(\(date))"
             case .contextSpecificPrimitive(let asn1):
-                printableWrapped(name: "CONTEXT_SPECIFIC primitive", asn1: asn1, showFullValue: showFullValue)
+                printableWrapped(name: "CONTEXT_SPECIFIC primitive", indentation: indentation.incremented, asn1: asn1, showFullValue: showFullValue)
             case .contextSpecificConstructed(let tag, let asnList):
                 "CONTEXT_SPECIFIC constructed [\(tag)] (EXPLICIT or CHOICE)\(asnList.map { $0.printable(indentation: indentation.incremented, showFullValue: showFullValue) }.joined())"
             case .applicationPrimitive(let asn1):
-                printableWrapped(name: "APPLICATION primitive", asn1: asn1, showFullValue: showFullValue)
+                printableWrapped(name: "APPLICATION primitive", indentation: indentation.incremented, asn1: asn1, showFullValue: showFullValue)
             case .applicationConstructed(let tag, let asnList):
                 "APPLICATION constructed [\(tag)]\(asnList.map { $0.printable(indentation: indentation.incremented, showFullValue: showFullValue) }.joined())"
             case .customTlv(let tlv):
@@ -99,13 +99,9 @@ extension ASN1: CustomStringConvertible {
         return (newLine ? "\n" : "") + String(repeating: "\t", count: indentation) + desc
     }
     
-    private func printableWrapped(name: String, asn1: ASN1, showFullValue: Bool) -> String {
-        asn1.convert {
-            if case .customTlv = $0 {
-                asn1.printable(newLine: false, showFullValue: showFullValue)
-            } else {
-                "\(name) \(asn1.printable(newLine: false, showFullValue: showFullValue))"
-            }
+    private func printableWrapped(name: String, indentation: Int, asn1: ASN1, showFullValue: Bool) -> String {
+        asn1.convert { asn1 in
+            "\(name) \(asn1.printable(indentation: indentation, newLine: true, showFullValue: showFullValue))"
         }
     }
     
