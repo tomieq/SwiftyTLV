@@ -10,7 +10,7 @@ let package = Package(
             targets: ["SwiftyTLV"])
     ],
     dependencies: [
-        .package(url: "https://github.com/tomieq/SwiftExtensions", .upToNextMajor(from: "1.1.0"))
+        .package(url: "https://github.com/tomieq/SwiftExtensions", from: "1.3.0")
     ],
     targets: [
         .target(

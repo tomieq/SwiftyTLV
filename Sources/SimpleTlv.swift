@@ -37,12 +37,12 @@ extension SimpleTlv {
         var resultData: Data = Data()
 
         if (length < 0xFF) {
-            resultData.append(UInt8(length))
+            resultData.append(asOneByte: length)
             return resultData
         }
 
         resultData.append(0xFF)
-        resultData.append(UInt16(length).data)
+        resultData.append(asTwoBytes: length)
         return resultData
     }
 }

@@ -46,8 +46,8 @@ public struct TagInfo {
         if data.isEmpty {
             return nil
         } else {
-            self.class = Class.allCases.first { data[safeIndex: 0].or(0) & Class.mask == $0.rawValue }.or(.universal)
-            self.form = Form.allCases.first { data[safeIndex: 0].or(0) & Form.mask == $0.rawValue }.or(.primitive)
+            self.class = Class.allCases.first { data[safeIndex: 0].or(0) & Class.mask == $0 }.or(.universal)
+            self.form = Form.allCases.first { data[safeIndex: 0].or(0) & Form.mask == $0 }.or(.primitive)
             var tag = data
             
             // remove metadata bits

@@ -54,23 +54,23 @@ extension BerTlv {
         var resultData: Data = Data()
 
         if length < 0x80 {
-            resultData.append(UInt8(length))
+            resultData.append(asOneByte: length)
             return resultData
         } else if length <= 0xFF {
             resultData.append(0x81)
-            resultData.append(UInt8(length))
+            resultData.append(asOneByte: length)
             return resultData
         } else if length <= 0xFFFF {
             resultData.append(0x82)
-            resultData.append(UInt16(length).data)
+            resultData.append(asTwoBytes: length)
             return resultData
         } else if length <= 0xFFFFFF {
             resultData.append(0x83)
-            resultData.append(UInt24(length).data)
+            resultData.append(asThreeBytes: length)
             return resultData
         }
         resultData.append(0x84)
-        resultData.append(UInt32(length).data)
+        resultData.append(asFourBytes: length)
         return resultData
     }
 
