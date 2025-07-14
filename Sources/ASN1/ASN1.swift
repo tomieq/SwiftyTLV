@@ -158,21 +158,6 @@ extension ASN1 {
 
 extension ASN1: Convertible {}
 
-public extension ASN1 {
-    var children: [ASN1] {
-        switch self {
-        case .sequence(let elements), .set(let elements):
-            return elements
-        default:
-            return []
-        }
-    }
-    
-    func child(at index: Int) -> ASN1? {
-        children[safeIndex: index]
-    }
-}
-
 fileprivate extension Int {
     var timeOfDay: String {
         String(format: "%02d", self)

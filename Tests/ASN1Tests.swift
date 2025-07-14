@@ -148,7 +148,7 @@ struct ASN1Tests {
         formatter.dateFormat = "yyMMddHHmmss'Z'"
         formatter.timeZone = TimeZone(abbreviation: "UTC")
         let date = formatter.date(from: "960415203000Z")!
-
+        
         let asn = ASN1.utcTime(date)
         let data = Data(hexString: "170D3936303431353230333030305A")
         let tlv = try BerTlv.from(data: data)
@@ -161,7 +161,7 @@ struct ASN1Tests {
         formatter.dateFormat = "yyyyMMddHHmmss"
         formatter.timeZone = TimeZone(abbreviation: "UTC")
         let date = formatter.date(from: "19960415203000")!
-
+        
         let asn = ASN1.generalizedTime(date)
         let data = Data(hexString: "180E3139393630343135323033303030")
         let tlv = try BerTlv.from(data: data)
@@ -182,7 +182,7 @@ struct ASN1Tests {
         formatter.dateFormat = "yyyyMMddHHmmss"
         formatter.timeZone = TimeZone(abbreviation: "UTC")
         let date = formatter.date(from: "20121221000000")!
-
+        
         let asn = ASN1.date(date)
         print(try asn.data.hexString)
         let data = Data(hexString: "1F1F0A323031322D31322D3231")
@@ -204,11 +204,19 @@ struct ASN1Tests {
         formatter.dateFormat = "yyyyMMddHHmmss"
         formatter.timeZone = TimeZone(abbreviation: "UTC")
         let date = formatter.date(from: "19511014153012")!
-
+        
         let asn = ASN1.dateTime(date)
         let data = Data(hexString: "1F2113313935312D31302D31345431353A33303A3132")
         let tlv = try BerTlv.from(data: data)
         #expect(try ASN1(tlv: tlv) == asn)
         #expect(try asn.data == data)
     }
-    
+
+    @Test func append() throws {
+        var sequence = ASN1.sequence([])
+        #expect(sequence.children.isEmpty)
+        try sequence.append(.boolean(true))
+        #expect(sequence.children.count == 1)
+        #expect(sequence.child(at: 0) == .boolean(true))
+    }
+}
